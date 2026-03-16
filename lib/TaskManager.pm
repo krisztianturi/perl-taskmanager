@@ -1,5 +1,5 @@
 package TaskManager;
-use Mojo::Base 'Mojolicious';  # -signatures törölve
+use Mojo::Base 'Mojolicious'; 
 use DBI;
 
 sub startup {
@@ -11,10 +11,13 @@ sub startup {
     # Configure secrets
     $self->secrets($config->{secrets});
 
-    # DB helper
+    # # DB helper
+    # $self->helper(db => sub {
+    # state $dbh = DBI->connect("dbi:Pg:dbname=task_db;host=localhost","dbuser","dbpass",{ RaiseError => 1, AutoCommit => 1 });
+    # });
+
     $self->helper(db => sub {
-        state $dbh = DBI->connect(
-            "dbi:Pg:dbname=$config->{dbname};host=$config->{dbhost};port=$config->{dbport}",
+        state $dbh = DBI->connect("dbi:Pg:dbname=$config->{dbname};host=$config->{dbhost};port=$config->{dbport}",
             $config->{dbuser},
             $config->{dbpass},
             { RaiseError => 1, AutoCommit => 1 }
@@ -30,7 +33,7 @@ sub startup {
     $r->post('/tasks/create')->to('Tasks#create');
 
     # Feladat szerkesztése
-    $r->post('/tasks/:id/edit')->to('Tasks#edit');
+    $r->post('/tasks/:id/update')->to('Tasks#update');
 
     # Feladat törlése
     $r->post('/tasks/:id/delete')->to('Tasks#delete');

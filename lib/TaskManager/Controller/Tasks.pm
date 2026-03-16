@@ -16,7 +16,7 @@ sub index {
     # Változó átadása a template-nek
     $c->render(template => 'tasks/index', tasks => \@tasks);
 }
-# Create
+
 sub create {
     my $c = shift;
     my $title = $c->param('title');
@@ -30,22 +30,27 @@ sub create {
     $c->redirect_to('/tasks');
 }
 
-# Edit
-sub edit {
-    my $c = shift;
-    my $id = $c->param('id');
-    my $title = $c->param('title');
-    my $description = $c->param('description');
+sub update {
+    my ($c) = @_;
+
+    my $id     = $c->param('id');
+    my $title  = $c->param('title');
+    my $desc   = $c->param('description');
     my $status = $c->param('status');
 
-    my $dbh = $c->db;
-    $dbh->do('UPDATE tasks SET title=?, description=?, status=? WHERE id=?',
-             undef, $title, $description, $status, $id);
+    unless ($title) {
+        $c->flash(error => 'Title is required');
+        return $c->redirect_to('/tasks');
+    }
+
+    my $sth = $c->db->prepare(
+        'UPDATE tasks SET title=?, description=?, status=? WHERE id=?'
+    );
+    $sth->execute($title, $desc, $status, $id);
 
     $c->redirect_to('/tasks');
 }
 
-# Delete
 sub delete {
     my $c = shift;
     my $id = $c->param('id');

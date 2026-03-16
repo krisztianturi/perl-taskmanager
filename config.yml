@@ -1,3 +1,8 @@
----
 secrets:
-  - dAHO7qIjC9aNoNJjOZSJTb2l3iFMH28j4nphmfY0Ven8ZJtTWH_hFt3ePkhdF2rNhtRvs8hA1eLwTF7W3r8GZqELtQRPZS-HXvvZTD6jbSJeNbZLLLu5Qj60dVSGPrW5jfZzEZGtP3PEtqn81ttXewMBdj_VTmLynU6Z-2LI8tw
+  - 'valami_titkos_jelszo'
+
+dbname: task_db
+dbhost: localhost
+dbport: 5432
+dbuser: postgres
+dbpass: 12345

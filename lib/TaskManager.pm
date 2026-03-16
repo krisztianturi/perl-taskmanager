@@ -1,22 +1,39 @@
 package TaskManager;
-use Mojo::Base 'Mojolicious', -signatures;
+use Mojo::Base 'Mojolicious';  # -signatures törölve
+use DBI;
 
-# This method will run once at server start
-sub startup ($self) {
+sub startup {
+    my $self = shift;
 
-  # Load configuration from config file
-  my $config = $self->plugin('NotYAMLConfig', { file => $ENV{PWD}.'/Config.yml' });
+    # Load configuration
+    my $config = $self->plugin('NotYAMLConfig', { file => $ENV{PWD}.'/Config.yml' });
 
-  # Configure the application
-  $self->secrets($config->{secrets});
+    # Configure secrets
+    $self->secrets($config->{secrets});
 
-  # Router
-  my $r = $self->routes;
+    # DB helper
+    $self->helper(db => sub {
+        state $dbh = DBI->connect(
+            "dbi:Pg:dbname=$config->{dbname};host=$config->{dbhost};port=$config->{dbport}",
+            $config->{dbuser},
+            $config->{dbpass},
+            { RaiseError => 1, AutoCommit => 1 }
+        );
+        return $dbh;
+    });
 
-  # Normal route to controller
-  $r->get('/')->to('Example#welcome');
+    # Router
+    my $r = $self->routes;
+    $r->get('/')->to('Example#welcome');
+    $r->get('/tasks')->to('Tasks#index');
+    # Új feladat létrehozása
+    $r->post('/tasks/create')->to('Tasks#create');
 
-  $r->get('/tasks')->to('tasks#index');
+    # Feladat szerkesztése
+    $r->post('/tasks/:id/edit')->to('Tasks#edit');
+
+    # Feladat törlése
+    $r->post('/tasks/:id/delete')->to('Tasks#delete');
 }
 
 1;

@@ -2,31 +2,56 @@ package TaskManager::Controller::Tasks;
 use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
-    my $c = shift;
+    my ($c) = @_;
 
-    # Példa: a DB-ből lekérjük a feladatokat
+    my $status = $c->param('status');
+    my $q      = $c->param('q');
+
     my $dbh = $c->db;
-    my $sth = $dbh->prepare("SELECT * FROM tasks ORDER BY id");
-    $sth->execute;
+
+    my $sql = "SELECT * FROM tasks WHERE 1=1";
+    my @params;
+
+    if ($status) {
+        $sql .= " AND status = ?";
+        push @params, $status;
+    }
+
+    if ($q) {
+        $sql .= " AND (title ILIKE ? OR description ILIKE ?)";
+        push @params, "%$q%", "%$q%";
+    }
+
+    my $sth = $dbh->prepare($sql);
+    $sth->execute(@params);
+
     my @tasks;
     while (my $row = $sth->fetchrow_hashref) {
         push @tasks, $row;
     }
 
-    # Változó átadása a template-nek
     $c->render(template => 'tasks/index', tasks => \@tasks);
 }
 
 sub create {
-    my $c = shift;
-    my $title = $c->param('title');
-    my $description = $c->param('description');
-    my $status = $c->param('status') // 'open';
+    my ($c) = @_;
 
-    my $dbh = $c->db;
-    $dbh->do('INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)',
-             undef, $title, $description, $status);
+    my $title  = $c->param('title');
+    my $desc   = $c->param('description');
+    my $status = $c->param('status');
 
+    unless ($title) {
+        $c->flash(error => 'Title is required');
+        return $c->redirect_to('/tasks');
+    }
+
+    my $sth = $c->db->prepare(
+        'INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)'
+    );
+
+    $sth->execute($title, $desc, $status);
+
+    $c->flash(message => 'Task created');
     $c->redirect_to('/tasks');
 }
 
@@ -39,15 +64,17 @@ sub update {
     my $status = $c->param('status');
 
     unless ($title) {
-        $c->flash(error => 'Title is required');
+        $c->flash(error => 'Title cannot be empty');
         return $c->redirect_to('/tasks');
     }
 
     my $sth = $c->db->prepare(
         'UPDATE tasks SET title=?, description=?, status=? WHERE id=?'
     );
+
     $sth->execute($title, $desc, $status, $id);
 
+    $c->flash(message => 'Task updated');
     $c->redirect_to('/tasks');
 }
 

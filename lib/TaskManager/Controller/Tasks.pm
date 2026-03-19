@@ -4,13 +4,13 @@ use Mojo::Base 'Mojolicious::Controller';
 sub index {
     my ($c) = @_;
 
-    my $status = $c->param('status');
-    my $q      = $c->param('q');
+    my $user_id = $c->session('user_id');   # csak saját taskok
+    my $status  = $c->param('status');
+    my $q       = $c->param('q');
+    my $dbh     = $c->db;
 
-    my $dbh = $c->db;
-
-    my $sql = "SELECT * FROM tasks WHERE 1=1";
-    my @params;
+    my $sql = "SELECT * FROM tasks WHERE user_id = ?";
+    my @params = ($user_id);
 
     if ($status) {
         $sql .= " AND status = ?";
@@ -32,24 +32,24 @@ sub index {
 
     $c->render(template => 'tasks/index', tasks => \@tasks);
 }
-
 sub create {
     my ($c) = @_;
 
-    my $title  = $c->param('title');
-    my $desc   = $c->param('description');
-    my $status = $c->param('status');
+    my $title       = $c->param('title');
+    my $description = $c->param('description');
+    my $status      = $c->param('status');
 
     unless ($title) {
         $c->flash(error => 'Title is required');
         return $c->redirect_to('/tasks');
     }
 
-    my $sth = $c->db->prepare(
-        'INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)'
-    );
+    my $user_id = $c->session('user_id');
 
-    $sth->execute($title, $desc, $status);
+    my $sth = $c->db->prepare(
+        "INSERT INTO tasks (title, description, status, user_id) VALUES (?, ?, ?, ?)"
+    );
+    $sth->execute($title, $description, $status, $user_id);
 
     $c->flash(message => 'Task created');
     $c->redirect_to('/tasks');
@@ -58,10 +58,11 @@ sub create {
 sub update {
     my ($c) = @_;
 
-    my $id     = $c->param('id');
-    my $title  = $c->param('title');
-    my $desc   = $c->param('description');
-    my $status = $c->param('status');
+    my $id          = $c->param('id');
+    my $title       = $c->param('title');
+    my $description = $c->param('description');
+    my $status      = $c->param('status');
+    my $user_id     = $c->session('user_id');
 
     unless ($title) {
         $c->flash(error => 'Title cannot be empty');
@@ -69,22 +70,22 @@ sub update {
     }
 
     my $sth = $c->db->prepare(
-        'UPDATE tasks SET title=?, description=?, status=? WHERE id=?'
+        'UPDATE tasks SET title=?, description=?, status=? WHERE id=? AND user_id=?'
     );
-
-    $sth->execute($title, $desc, $status, $id);
+    $sth->execute($title, $description, $status, $id, $user_id);
 
     $c->flash(message => 'Task updated');
     $c->redirect_to('/tasks');
 }
 
 sub delete {
-    my $c = shift;
-    my $id = $c->param('id');
+    my ($c) = @_;
+    my $id      = $c->param('id');
+    my $user_id = $c->session('user_id');
 
-    my $dbh = $c->db;
-    $dbh->do('DELETE FROM tasks WHERE id=?', undef, $id);
+    $c->db->do('DELETE FROM tasks WHERE id=? AND user_id=?', undef, $id, $user_id);
 
+    $c->flash(message => 'Task deleted');
     $c->redirect_to('/tasks');
 }
 1;

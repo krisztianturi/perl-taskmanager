@@ -6,6 +6,22 @@
   </head>
 
   <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">TaskManager</a>
+
+      <div class="d-flex">
+        % if (session 'user_id') {
+          <span class="navbar-text text-white me-3">
+            Logged in as <%= session 'username' %>
+          </span>
+          <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
+        % } else {
+          <a href="/login" class="btn btn-outline-light btn-sm">Login</a>
+        % }
+      </div>
+    </div>
+  </nav>
     <%= content %>
   </body>
 </html>

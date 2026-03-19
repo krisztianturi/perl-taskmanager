@@ -60,7 +60,7 @@
       </tr>
     </thead>
     <tbody>
-      % for my $task (@$tasks) {
+      % for my $task (@$tasks) { 
       <tr data-id="<%= $task->{id} %>">
     <td><%= $task->{id} %></td>
     <form action="/tasks/<%= $task->{id} %>/update" method="post">

@@ -20,13 +20,31 @@ sub startup {
         );
         return $dbh;
     });
-
+#public route
     my $r = $self->routes;
+
     $r->get('/')->to('Example#welcome');
-    $r->get('/tasks')->to('Tasks#index');
-    $r->post('/tasks/create')->to('Tasks#create');
-    $r->post('/tasks/:id/update')->to('Tasks#update');
-    $r->post('/tasks/:id/delete')->to('Tasks#delete');
+
+    $r->get('/login')->to('auth#login_form');
+    $r->post('/login')->to('auth#login');
+    $r->get('/logout')->to('auth#logout');
+
+#safe route
+    my $auth = $r->under(sub {
+        my $c = shift;
+
+        return 1 if $c->session('user_id');
+
+        $c->redirect_to('/login');
+        return undef;
+    });
+
+    $auth->get('/tasks')->to('Tasks#index');
+    $auth->post('/tasks/create')->to('Tasks#create');
+    $auth->post('/tasks/:id/update')->to('Tasks#update');
+    $auth->post('/tasks/:id/delete')->to('Tasks#delete');
+
+
 }
 
 1;

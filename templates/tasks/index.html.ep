@@ -61,40 +61,40 @@
     </thead>
     <tbody>
       % for my $task (@$tasks) { 
-      <tr data-id="<%= $task->{id} %>">
-    <td><%= $task->{id} %></td>
-    <form action="/tasks/<%= $task->{id} %>/update" method="post">
-      <td><input type="text" name="title" value="<%= $task->{title} %>" class="form-control form-control-sm" readonly></td>
-      <td><input type="text" name="description" value="<%= $task->{description} %>" class="form-control form-control-sm" readonly></td>
-<td>
-
-  % my $status = $task->{status};
-
-  <span class="status-badge badge
-    <%= $status eq 'open' ? 'bg-secondary' :
-        $status eq 'in progress' ? 'bg-warning text-dark' :
-        'bg-success' %>">
-    <%= $status %>
-  </span>
-
-  <select name="status" class="form-select form-select-sm status-select" style="display:none">
-    <option value="open" <%== $status eq 'open' ? 'selected' : '' %>>Open</option>
-    <option value="in progress" <%== $status eq 'in progress' ? 'selected' : '' %>>In Progress</option>
-    <option value="done" <%== $status eq 'done' ? 'selected' : '' %>>Done</option>
-  </select>
-
-</td>
+          <tr data-id="<%= $task->{id} %>">
+        <td><%= $task->{id} %></td>
+        <form action="/tasks/<%= $task->{id} %>/update" method="post">
+          <td><input type="text" name="title" value="<%= $task->{title} %>" class="form-control form-control-sm" readonly></td>
+          <td><input type="text" name="description" value="<%= $task->{description} %>" class="form-control form-control-sm" readonly></td>
     <td>
-      <button type="button" class="btn btn-secondary btn-sm edit-btn">Edit</button>
-      <button type="submit" class="btn btn-primary btn-sm update-btn" style="display:none">Update</button>
+
+      % my $status = $task->{status};
+
+      <span class="status-badge badge
+        <%= $status eq 'open' ? 'bg-secondary' :
+            $status eq 'in progress' ? 'bg-warning text-dark' :
+            'bg-success' %>">
+        <%= $status %>
+      </span>
+
+      <select name="status" class="form-select form-select-sm status-select" style="display:none">
+        <option value="open" <%== $status eq 'open' ? 'selected' : '' %>>Open</option>
+        <option value="in progress" <%== $status eq 'in progress' ? 'selected' : '' %>>In Progress</option>
+        <option value="done" <%== $status eq 'done' ? 'selected' : '' %>>Done</option>
+      </select>
+
     </td>
-  </form>
         <td>
-          <form action="/tasks/<%= $task->{id} %>/delete" method="post">
-            <button class="btn btn-danger btn-sm">Delete</button>
-          </form>
+          <button type="button" class="btn btn-secondary btn-sm edit-btn">Edit</button>
+          <button type="submit" class="btn btn-primary btn-sm update-btn" style="display:none">Update</button>
         </td>
-      </tr>
+      </form>
+            <td>
+              <form action="/tasks/<%= $task->{id} %>/delete" method="post">
+                <button class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
       % }
     </tbody>
   </table>

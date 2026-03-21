@@ -8,10 +8,6 @@ sub startup {
     my $config = $self->plugin('NotYAMLConfig', { file => $ENV{PWD}.'/Config.yml' });
     $self->secrets($config->{secrets});
 
-    # $self->helper(db => sub {
-    # state $dbh = DBI->connect("dbi:Pg:dbname=task_db;host=localhost","dbuser","dbpass",{ RaiseError => 1, AutoCommit => 1 });
-    # });
-
     $self->helper(db => sub {
         state $dbh = DBI->connect("dbi:Pg:dbname=$config->{dbname};host=$config->{dbhost};port=$config->{dbport}",
             $config->{dbuser},
@@ -20,6 +16,7 @@ sub startup {
         );
         return $dbh;
     });
+    
 #public route
     my $r = $self->routes;
 
@@ -28,6 +25,9 @@ sub startup {
     $r->get('/login')->to('auth#login_form');
     $r->post('/login')->to('auth#login');
     $r->get('/logout')->to('auth#logout');
+
+    $r->get('/register')->to('auth#register_form');
+    $r->post('/register')->to('auth#register');
 
 #safe route
     my $auth = $r->under(sub {
